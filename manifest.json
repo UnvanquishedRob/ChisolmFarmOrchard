@@ -2,7 +2,7 @@
   "name": "Zone 9 Orchard Guide",
   "short_name": "Orchard",
   "description": "Fruit tree & berry care guide for Zone 9 / Simonton, TX",
-  "start_url": "./index.html",
+      "start_url": "/ChisolmFarmOrchard/"
   "display": "standalone",
   "background_color": "#1a2e0a",
   "theme_color": "#2d5a0e",
