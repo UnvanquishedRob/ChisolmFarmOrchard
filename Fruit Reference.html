@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2d5a0e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Orchard">
+<meta name="description" content="Fruit tree & berry care guide for Zone 9 / Simonton, TX">
+<link rel="manifest" href="manifest.json">
+<title>Zone 9 Orchard Guide</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --green-dark: #1a2e0a;
+  --green-deep: #2d5a0e;
+  --green-mid: #4a8c1c;
+  --green-light: #7dc43a;
+  --green-pale: #e8f5d0;
+  --green-ultra: #f2fae6;
+  --amber: #c47a1a;
+  --amber-light: #fef3e0;
+  --coral: #c04020;
+  --coral-light: #fdeee8;
+  --teal: #0f6e56;
+  --teal-light: #e0f5ef;
+  --blue: #1a5fa5;
+  --blue-light: #e6f0fb;
+  --text: #1a1a1a;
+  --text-muted: #5a6a4a;
+  --text-faint: #8a9a7a;
+  --bg: #f7faf2;
+  --bg-card: #ffffff;
+  --border: #d4e4b8;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 8px rgba(45,90,14,0.10);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --green-dark: #0a1505;
+    --green-deep: #1e3d0a;
+    --green-mid: #3a6e14;
+    --green-light: #6ab830;
+    --green-pale: #1a2d0a;
+    --green-ultra: #121f07;
+    --amber-light: #2a1e05;
+    --coral-light: #2a1008;
+    --teal-light: #082018;
+    --blue-light: #080f1f;
+    --text: #e8f2d8;
+    --text-muted: #9aae80;
+    --text-faint: #6a7e54;
+    --bg: #0e1a06;
+    --bg-card: #162208;
+    --border: #2a4010;
+    --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+}
+
+html, body { height: 100%; overflow: hidden; background: var(--green-dark); }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--green-deep);
+  color: #fff;
+  padding: calc(var(--safe-top) + 12px) 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  z-index: 10;
+}
+.header-icon { font-size: 26px; }
+.header-text h1 { font-size: 18px; font-weight: 600; color: #fff; letter-spacing: -0.3px; }
+.header-text p { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+.install-btn {
+  margin-left: auto;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: none;
+  flex-shrink: 0;
+}
+.install-btn.visible { display: block; }
+
+/* ── Main layout ── */
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Plant grid ── */
+.plant-section {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.plant-scroll {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.plant-scroll::-webkit-scrollbar { display: none; }
+
+.plant-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  min-width: 64px;
+  user-select: none;
+}
+.plant-chip:active { transform: scale(0.95); }
+.plant-chip.active {
+  background: var(--green-pale);
+  border-color: var(--green-mid);
+}
+.plant-chip-icon { font-size: 24px; }
+.plant-chip-label { font-size: 10px; font-weight: 500; color: var(--text-muted); text-align: center; white-space: nowrap; }
+.plant-chip.active .plant-chip-label { color: var(--green-deep); }
+
+/* ── Empty state ── */
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-muted);
+  padding: 2rem;
+  text-align: center;
+}
+.empty-emoji { font-size: 56px; }
+.empty h2 { font-size: 18px; font-weight: 600; color: var(--text); }
+.empty p { font-size: 14px; line-height: 1.5; }
+
+/* ── Detail panel ── */
+.detail { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+.plant-hero {
+  background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-mid) 100%);
+  padding: 14px 16px;
+  flex-shrink: 0;
+}
+.plant-hero h2 { font-size: 20px; font-weight: 700; color: #fff; }
+.plant-hero p { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 3px; line-height: 1.4; }
+
+/* ── Tab bar ── */
+.tabs {
+  display: flex;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab-btn {
+  flex: 1;
+  padding: 11px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-faint);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.tab-btn span.ti { font-size: 18px; }
+.tab-btn.active { color: var(--green-deep); border-bottom-color: var(--green-mid); }
+
+/* ── Tab content ── */
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px;
+  background: var(--bg);
+  padding-bottom: calc(var(--safe-bottom) + 14px);
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.card-body { padding: 12px 14px; }
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  margin-bottom: 8px;
+  margin-top: 14px;
+}
+.section-label:first-child { margin-top: 0; }
+
+/* Water cards */
+.water-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.water-card {
+  background: var(--teal-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.water-yr { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--teal); margin-bottom: 4px; }
+.water-txt { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+/* Moisture indicator */
+.moisture-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.moisture-dots { display: flex; gap: 4px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--border); }
+.dot.on { background: var(--teal); }
+.moisture-lbl { font-size: 12px; color: var(--text-muted); line-height: 1.4; flex: 1; }
+
+/* Fertilizer */
+.fert-row {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.fert-row:last-child { border-bottom: none; }
+.fert-when { font-size: 11px; font-weight: 600; color: var(--amber); min-width: 80px; padding-top: 1px; }
+.fert-what { font-size: 13px; color: var(--text); line-height: 1.4; flex: 1; }
+
+/* Pest / disease accordions */
+.accord {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.accord-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.accord-head:active { background: var(--bg); }
+.accord-icon { font-size: 20px; flex-shrink: 0; }
+.accord-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+.accord-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.badge-high { background: var(--coral-light); color: var(--coral); }
+.badge-crit { background: #3a0000; color: #ff6b6b; }
+.badge-mod { background: var(--amber-light); color: var(--amber); }
+.badge-low { background: var(--green-pale); color: var(--green-deep); }
+.accord-chevron { font-size: 16px; color: var(--text-faint); transition: transform 0.2s; flex-shrink: 0; }
+.accord.open .accord-chevron { transform: rotate(180deg); }
+.accord-body {
+  display: none;
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+}
+.accord.open .accord-body { display: block; }
+
+.id-block { margin-top: 10px; }
+.id-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-faint); margin-bottom: 4px; }
+.id-txt { font-size: 13px; color: var(--text); line-height: 1.5; background: var(--bg); border-radius: var(--radius-sm); padding: 8px 10px; }
+
+.photo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 7px 12px;
+  background: var(--blue-light);
+  color: var(--blue);
+  border: 1px solid rgba(26,95,165,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+.photo-btn span { font-size: 14px; }
+
+.tip-list { list-style: none; margin-top: 10px; }
+.tip-list li {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  padding: 6px 0 6px 18px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.tip-list li:last-child { border-bottom: none; }
+.tip-list li::before { content: "→"; position: absolute; left: 0; color: var(--green-mid); font-size: 12px; top: 7px; }
+
+.note-box {
+  background: var(--amber-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+.note-box span { font-size: 16px; flex-shrink: 0; }
+.note-box.green { background: var(--green-pale); }
+
+/* Icons via text */
+.icon { display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🌳</div>
+  <div class="header-text">
+    <h1>Zone 9 Orchard Guide</h1>
+    <p>Simonton, TX · Chemical-free care</p>
+  </div>
+  <button class="install-btn" id="installBtn" onclick="installApp()">＋ Install</button>
+</div>
+
+<div class="main">
+  <div class="plant-section">
+    <div class="plant-scroll" id="plantScroll"></div>
+  </div>
+
+  <div id="emptyState" class="empty">
+    <div class="empty-emoji">🌱</div>
+    <h2>Select a plant above</h2>
+    <p>Tap any fruit tree or berry to view its complete care guide — watering, fertilizer, pests, and diseases.</p>
+  </div>
+
+  <div id="detailView" class="detail" style="display:none;">
+    <div class="plant-hero">
+      <h2 id="heroTitle"></h2>
+      <p id="heroSub"></p>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('water',this)">
+        <span>💧</span>Water
+      </button>
+      <button class="tab-btn" onclick="switchTab('fert',this)">
+        <span>🌿</span>Fertilizer
+      </button>
+      <button class="tab-btn" onclick="switchTab('pests',this)">
+        <span>🐛</span>Pests
+      </button>
+      <button class="tab-btn" onclick="switchTab('disease',this)">
+        <span>🍂</span>Disease
+      </button>
+    </div>
+    <div class="tab-content" id="tabContent"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  pomegranate: {
+    name:"Pomegranate", icon:"🍈",
+    sub:"Punica granatum · drought-tolerant once established",
+    moisture:{level:2, label:"Moderate — allow surface to dry between waterings"},
+    water:{
+      yr1:"Water 2–3× per week; 5–10 gal per session. Critical to establish roots during hot TX summers.",
+      yr2:"Reduce to 1–2× per week. Deep watering (8–12 gal) encourages deep rooting.",
+      mature:"Every 7–14 days during growing season. Very drought-tolerant when established. Minimal water in winter."
+    },
+    fert:[
+      {when:"Late February",what:"Balanced 10-10-10 or organic compost. Zone 9 gets 3 applications per year."},
+      {when:"Late May",what:"Second balanced fertilizer application — supports fruit set."},
+      {when:"Late July",what:"Final fertilizer. NEVER fertilize after August — new growth will get frost-damaged."},
+      {when:"Year 3+",what:"Switch to low-nitrogen fertilizer (first number <5). Apply only in late February."}
+    ],
+    fertNote:"Include micronutrients: iron, zinc, manganese, magnesium, copper, boron. Stop all feeding after August.",
+    pests:[
+      {name:"Aphids",sev:"Moderate",sevClass:"badge-mod",id:"Tiny soft-bodied insects (green/yellow/black) clustered on new shoots and leaf undersides. Sticky honeydew residue; sooty black mold may follow.",photo:"https://www.google.com/search?tbm=isch&q=aphids+on+pomegranate+tree",tips:["Blast off with strong water spray weekly","Release ladybugs and lacewings — natural predators","Plant marigolds and asters nearby to attract beneficials","Wipe colonies with damp cloth on small stems"]},
+      {name:"Pomegranate Butterfly",sev:"High",sevClass:"badge-high",id:"Reddish-orange butterfly larvae bore into developing fruit. Entry holes with frass (sawdust-like material). Fruit drops prematurely.",photo:"https://www.google.com/search?tbm=isch&q=pomegranate+butterfly+larva+damage",tips:["Bag individual fruits with mesh netting when marble-sized","Pick and destroy fallen or damaged fruit immediately","Install bird perches nearby to attract insect-eating birds","Hand-pick caterpillars early morning"]},
+      {name:"Whiteflies",sev:"Low",sevClass:"badge-low",id:"Tiny white winged insects on leaf undersides. Clouds of white 'dust' when plant disturbed. Sticky residue; yellowing leaves.",photo:"https://www.google.com/search?tbm=isch&q=whitefly+pomegranate",tips:["Yellow sticky traps near foliage","Strong water spray on undersides of leaves","Reflective mulch under trees confuses adults","Encourage parasitic wasps — plant dill and fennel"]}
+    ],
+    diseases:[
+      {name:"Cercospora Fruit Spot",id:"Small dark brown to black spots on fruit skin, sometimes with yellow halo. Spots may merge. Worse in humid conditions.",photo:"https://www.google.com/search?tbm=isch&q=cercospora+fruit+spot+pomegranate",tips:["Open canopy pruning to improve air circulation","Avoid overhead watering — drip at base only","Remove and dispose of infected fruit and leaf debris","Copper-based organic spray at fruit set in wet years"]},
+      {name:"Heart Rot (Alternaria)",id:"Fruit looks normal outside but inner seeds/membranes are dark brown-black and rotten. Discovered at harvest. Fungal spores enter through wounds and cracks.",photo:"https://www.google.com/search?tbm=isch&q=pomegranate+heart+rot+alternaria",tips:["Consistent irrigation prevents stress-cracking (primary entry point)","Pick up any cracked fruit immediately","Reduce nitrogen to avoid soft, crack-prone fruit walls","Ensure good drainage; no waterlogging"]}
+    ]
+  },
+  apple: {
+    name:"Apple", icon:"🍎",
+    sub:"Malus domestica · choose low-chill: Anna, Dorsett Golden, Ein Shemer",
+    moisture:{level:3, label:"Moderate-high — evenly moist, especially during fruit development"},
+    water:{
+      yr1:"Water 2–3× per week, 5–8 gal. Never let soil dry out during the first TX summer — critical for survival.",
+      yr2:"1–2× per week, 8–12 gal deep watering. Mulch heavily to retain moisture.",
+      mature:"Weekly deep watering in growing season. Every 2 weeks in cooler months. Increase during fruit swell."
+    },
+    fert:[
+      {when:"Early March",what:"Balanced 10-10-10 or organic fruit tree fertilizer; 1 lb per inch of trunk diameter."},
+      {when:"Late May",what:"Organic compost side-dress (2–3 inches around drip line, not touching trunk)."},
+      {when:"Stop by August",what:"Late fertilizing causes soft growth vulnerable to early TX frosts."}
+    ],
+    fertNote:"Low-chill apples in Zone 9 need careful nitrogen management. Over-fertilizing = lush growth, few apples.",
+    pests:[
+      {name:"Codling Moth",sev:"High",sevClass:"badge-high",id:"Small pinkish larvae inside fruit with brown frass-filled tunnels. Entry hole with sawdust-like material. Adult is a 3/4 inch gray moth.",photo:"https://www.google.com/search?tbm=isch&q=codling+moth+apple+damage",tips:["Pheromone traps before bloom to monitor adult flight","Kaolin clay on fruit after petal fall","Paper bag or mesh individual fruit clusters","Remove mummified fruit from tree and ground"]},
+      {name:"Apple Aphids",sev:"Moderate",sevClass:"badge-mod",id:"Green apple aphid: bright green colonies on shoot tips. Woolly apple aphid: white cottony masses on branches and trunk. Sticky honeydew; reduced growth.",photo:"https://www.google.com/search?tbm=isch&q=woolly+apple+aphid+identification",tips:["Water blast colonies from shoots weekly","Introduce ladybugs and parasitic wasps","Dormant horticultural oil in late winter","Scrub woolly colonies with stiff brush and soapy water"]},
+      {name:"San Jose Scale",sev:"Moderate",sevClass:"badge-mod",id:"Tiny circular gray scales (1/16 inch) with yellow dot at center stuck to bark and fruit. Red halos on fruit skin. Branch dieback in heavy cases.",photo:"https://www.google.com/search?tbm=isch&q=san+jose+scale+apple",tips:["Dormant horticultural oil spray in late winter — smothers eggs","Prune heavily infested branches and dispose","Encourage natural predators: minute pirate bugs, lady beetles"]}
+    ],
+    diseases:[
+      {name:"Fire Blight",id:"Branch tips wilt suddenly and turn brown-black, curling like a shepherd's crook. Blossoms shrivel and brown. Bark may appear water-soaked. Very destructive in humid TX springs.",photo:"https://www.google.com/search?tbm=isch&q=fire+blight+apple+shepherds+crook",tips:["Prune infected wood 12 inches below visible infection; sterilize tools with bleach between cuts","Avoid heavy nitrogen which promotes susceptible soft growth","Never prune or work in orchard when wet — spreads bacteria","Choose resistant varieties: Dorsett Golden has moderate resistance"]},
+      {name:"Cedar Apple Rust",id:"Bright orange-yellow spots on upper leaf surface; tube-like structures on undersides. Distorted leaves; premature fruit drop. Requires nearby Eastern red cedar as alternate host.",photo:"https://www.google.com/search?tbm=isch&q=cedar+apple+rust+leaf+symptoms",tips:["Remove nearby Eastern red cedar trees within 1 mile if possible","Remove and dispose of infected leaves and fruit","Open-center pruning for air flow","Copper-based organic spray from bud swell through petal fall"]}
+    ]
+  },
+  plum: {
+    name:"Plum", icon:"🫐",
+    sub:"Prunus salicina · Methley, Bruce, Morris, Santa Rosa for Zone 9",
+    moisture:{level:3, label:"Moderate — consistent moisture during fruit swell; slight dry-down OK otherwise"},
+    water:{
+      yr1:"2–3× per week, 5–8 gal. Keep roots moist but never waterlogged. Critical April–September.",
+      yr2:"Weekly deep watering (10–15 gal). Mulch 3–4 inches around base.",
+      mature:"Every 7–10 days during growing season. Increase during pit hardening and fruit swell."
+    },
+    fert:[
+      {when:"Early February",what:"Balanced fertilizer or aged compost; 1 cup per year of tree age (up to 1 lb)."},
+      {when:"Early June",what:"Light balanced fertilizer after fruit set."},
+      {when:"Stop by July",what:"No fall fertilizing — promotes frost-vulnerable new growth."}
+    ],
+    fertNote:"Plums benefit from phosphorus to encourage fruiting. Avoid excess nitrogen — reduces fruit set.",
+    pests:[
+      {name:"Peach Twig Borer",sev:"High",sevClass:"badge-high",id:"Brown larvae (1/2 inch) inside wilted shoot tips (flagging). Later enter fruit near stem with frass. Adult is a small gray moth.",photo:"https://www.google.com/search?tbm=isch&q=peach+twig+borer+damage",tips:["Dormant horticultural oil in late winter smothers larvae","Pheromone traps to track adult flight","Bacillus thuringiensis (Bt) spray on young larvae","Remove and destroy wilted shoot tips promptly"]},
+      {name:"Plum Curculio",sev:"High",sevClass:"badge-high",id:"Small brown snout beetle (1/4 inch). Crescent-shaped egg-laying scars on young fruit. Larvae inside cause premature fruit drop.",photo:"https://www.google.com/search?tbm=isch&q=plum+curculio+beetle",tips:["Spread tarp under tree; shake tree early morning — adults drop and can be collected","Keep ground clear of fallen fruit","Kaolin clay (Surround) applied at petal fall through fruit development"]}
+    ],
+    diseases:[
+      {name:"Brown Rot",id:"Soft brown rot on fruit with tan powdery spore rings in concentric circles. Blossoms and young shoots can also wilt and brown. Worst in warm, humid weather.",photo:"https://www.google.com/search?tbm=isch&q=brown+rot+plum+fruit",tips:["Remove all infected and mummified fruit immediately","Prune for open canopy — maximize air circulation","Drip irrigation only; no overhead watering","Organic copper spray at bloom in wet weather years"]},
+      {name:"Black Knot",id:"Black elongated galls on branches, starting as olive-green swellings in spring and hardening black by fall. Causes dieback beyond the knot.",photo:"https://www.google.com/search?tbm=isch&q=black+knot+plum+branch",tips:["Prune infected branches 4 inches below the knot; sterilize tools between cuts","Remove and dispose (bag or burn) — never compost infected wood","Inspect annually in late winter when knots are visible"]}
+    ]
+  },
+  pear: {
+    name:"Pear", icon:"🍐",
+    sub:"Pyrus communis/pyrifolia · Kieffer, Orient, Warren, Pineapple for Zone 9",
+    moisture:{level:3, label:"Moderate — good drainage critical; consistent moisture during fruit development"},
+    water:{
+      yr1:"Water 2–3× per week (5–8 gal). Deep watering to establish taproot. First summer is most critical.",
+      yr2:"Weekly deep watering; 10–15 gal per session. Increase during dry spells.",
+      mature:"Every 7–14 days growing season. Asian pears need more water during fruit swell."
+    },
+    fert:[
+      {when:"Early spring",what:"Slow-release balanced fertilizer or 2–3 inches compost around drip line."},
+      {when:"Optional June",what:"Light balanced feed only if growth seems sluggish."},
+      {when:"Year 3+",what:"Pears need LESS fertilizer than most fruit trees. Excess nitrogen = fire blight risk."}
+    ],
+    fertNote:"Less is more with pears in Zone 9. Moderate, slow growth is the goal — fast succulent growth is fire blight bait.",
+    pests:[
+      {name:"Pear Psylla",sev:"Moderate",sevClass:"badge-mod",id:"Tiny jumping insects (1/10 inch) like mini cicadas. Sticky honeydew coats leaves; sooty mold follows. Nymphs are orange/green flat bugs on leaf undersides.",photo:"https://www.google.com/search?tbm=isch&q=pear+psylla+pest",tips:["Dormant oil spray before bud break — kills overwintering adults and eggs","Kaolin clay applied early season","Encourage predators: lady beetles, lacewings, minute pirate bugs"]},
+      {name:"Codling Moth",sev:"High",sevClass:"badge-high",id:"Pinkish larvae inside fruit with brown frass-filled entry tunnels. Entry hole may show sawdust-like material.",photo:"https://www.google.com/search?tbm=isch&q=codling+moth+pear+damage",tips:["Pheromone traps; kaolin clay on fruit; bag fruit clusters","Remove fallen and mummified fruit","Sticky tree bands to trap crawling larvae"]}
+    ],
+    diseases:[
+      {name:"Fire Blight",id:"Shepherd's crook wilted branch tips, brown-black blossoms, water-soaked bark. PEARS ARE MORE SUSCEPTIBLE THAN APPLES. Major threat in humid Zone 9 springs.",photo:"https://www.google.com/search?tbm=isch&q=fire+blight+pear+tree",tips:["Prune infected wood 12+ inches below infection; sterilize tools with bleach between cuts","Choose resistant varieties: Kieffer and Orient are most resistant","Avoid excess nitrogen; no overhead irrigation during bloom"]},
+      {name:"Fabraea Leaf Spot",id:"Dark brown to black circular spots on leaves, often with purplish border. Premature defoliation in summer. Spots may appear on fruit and twigs too.",photo:"https://www.google.com/search?tbm=isch&q=fabraea+leaf+spot+pear",tips:["Rake and remove fallen leaves; dispose (not compost)","Copper-based organic spray in early spring and after harvest","Improve air flow with open-canopy pruning"]}
+    ]
+  },
+  olive: {
+    name:"Olive", icon:"🫒",
+    sub:"Olea europaea · Mission, Arbequina, Sevillano — excellent Zone 9 performer",
+    moisture:{level:1, label:"Low — drought-tolerant; prefers dry to moderate; perfect drainage required"},
+    water:{
+      yr1:"Water 2–3× per week during summer establishment (5–8 gal). Reduce in cooler months.",
+      yr2:"Weekly in summer; every 2 weeks in mild weather. Olives hate wet roots.",
+      mature:"Every 2–4 weeks in summer. Virtually no supplemental water needed in fall/winter once established."
+    },
+    fert:[
+      {when:"Early spring",what:"Balanced organic fertilizer or 1–2 inches compost. Olives are light feeders."},
+      {when:"Optional early summer",what:"Nitrogen boost if growth is slow (blood meal or feather meal)."}
+    ],
+    fertNote:"Olives are the least demanding fruit tree for fertilizer. Over-feeding causes excess vegetative growth and reduces fruit set.",
+    pests:[
+      {name:"Olive Fruit Fly",sev:"High",sevClass:"badge-high",id:"Small fly with transparent wings and yellow body. Puncture marks on ripening olives; larvae tunnel through flesh. Fruit drops prematurely or rots on tree.",photo:"https://www.google.com/search?tbm=isch&q=olive+fruit+fly+bactrocera+oleae",tips:["Yellow sticky traps hung in canopy; monitor weekly from August","Kaolin clay on fruit Aug through harvest — physical barrier","Harvest early when possible to reduce fly damage window","Remove and destroy all fallen fruit — eliminates pupation sites"]},
+      {name:"Scale Insects",sev:"Moderate",sevClass:"badge-mod",id:"Black, brown, or white waxy oval bumps on branches and trunk. Sticky honeydew; sooty mold on leaves. Branch dieback in heavy infestations.",photo:"https://www.google.com/search?tbm=isch&q=olive+scale+insects+branch",tips:["Dormant horticultural oil spray in late winter","Scrape colonies from bark with stiff brush","Encourage parasitic wasps — avoid broad pesticide use"]}
+    ],
+    diseases:[
+      {name:"Olive Knot",id:"Rough, spongy galls on branches and twigs, 1/4 to 2 inches. Causes dieback beyond the knot. Enters through wounds and pruning cuts.",photo:"https://www.google.com/search?tbm=isch&q=olive+knot+disease+gall",tips:["Prune infected tissue 4+ inches below knot; sterilize tools after each cut","Never prune in wet weather — bacteria spread via rain splash","Organic copper spray after pruning and at leaf fall"]},
+      {name:"Peacock Spot",id:"Yellow halos on upper leaf surfaces with dark olive-green centers (peacock feather pattern). Premature leaf drop. Worse in wet winters.",photo:"https://www.google.com/search?tbm=isch&q=peacock+spot+olive+leaf",tips:["Copper-based organic spray at leaf fall and late winter before bud break","Improve air circulation; avoid overhead watering","Remove and dispose of fallen infected leaves"]}
+    ]
+  },
+  grapefruit: {
+    name:"Grapefruit", icon:"🍊",
+    sub:"Citrus paradisi · Zone 9 marginal — protect from freezes; Ruby Red best",
+    moisture:{level:3, label:"Moderate — consistent moisture; excellent drainage essential; no waterlogging"},
+    water:{
+      yr1:"Water every 2–3 days (5–8 gal) during summer. New citrus cannot tolerate drought or waterlogging.",
+      yr2:"Water 1–2× per week. Reduce in winter but don't let roots go fully dry.",
+      mature:"Every 5–7 days in summer. Every 2 weeks in winter. Drip irrigation preferred."
+    },
+    fert:[
+      {when:"February",what:"Organic citrus fertilizer (high nitrogen): blood meal, feather meal, or citrus-specific blend."},
+      {when:"May",what:"Second application of citrus fertilizer — supports fruit set and development."},
+      {when:"August",what:"Final nitrogen application. No fertilizing after September."}
+    ],
+    fertNote:"Citrus are heavy feeders. Use citrus-formulated organic fertilizer with zinc, manganese, and iron micronutrients. Yellowing often means iron or zinc deficiency — use chelated foliar spray.",
+    pests:[
+      {name:"Asian Citrus Psyllid",sev:"Critical",sevClass:"badge-crit",id:"Small brown jumping insect feeding at 45-degree angle. Leaves white waxy tubular filaments. Nymphs yellow-green on new flush. REPORT TO TX AGRILIFE IMMEDIATELY — carries HLB greening disease.",photo:"https://www.google.com/search?tbm=isch&q=asian+citrus+psyllid+identification",tips:["Report to TX AgriLife Extension immediately if found","Reflective mulch under tree to deter adults","Kaolin clay on new flush growth","Parasitic wasps (Tamarixia radiata) — contact local extension for release programs"]},
+      {name:"Citrus Leafminer",sev:"Moderate",sevClass:"badge-mod",id:"Silvery serpentine tunnels in new growth leaves, which curl and distort. Tiny moth lays eggs on new flush only.",photo:"https://www.google.com/search?tbm=isch&q=citrus+leafminer+damage",tips:["Kaolin clay on new growth flushes — major deterrent","Remove severely mined leaves","Avoid excess fertilizing that promotes flush surges"]},
+      {name:"Citrus Scale",sev:"Moderate",sevClass:"badge-mod",id:"Brown soft scale: flat oval brown bumps on stems producing heavy honeydew. Florida red scale: smaller flat reddish discs on fruit and leaves.",photo:"https://www.google.com/search?tbm=isch&q=citrus+brown+soft+scale",tips:["Horticultural oil spray in late winter before new growth","Scrub scale from branches with brush and soapy water","Encourage natural enemies; avoid broad-spectrum sprays"]}
+    ],
+    diseases:[
+      {name:"Citrus Greening (HLB)",id:"Asymmetric blotchy mottling of leaves — unlike uniform nutritional yellowing. Fruit remains green, small, misshapen, bitter. NO CURE. Spread by Asian Citrus Psyllid.",photo:"https://www.google.com/search?tbm=isch&q=citrus+greening+HLB+symptoms",tips:["Prevention ONLY: control Asian Citrus Psyllid aggressively","Report to TX AgriLife immediately if suspected","Buy only certified disease-free nursery stock","Remove and destroy infected trees to protect neighbors"]},
+      {name:"Phytophthora Root Rot",id:"Tree declines; leaves yellow and drop. Bark at or below soil line shows brown water-soaked lesions (gummosis — oozing gum). Roots are brown and dead.",photo:"https://www.google.com/search?tbm=isch&q=phytophthora+citrus+gummosis",tips:["Improve drainage; never plant in low spots","Keep mulch away from trunk (6-inch gap minimum)","Raise tree on berm or raised bed if soil drains poorly","Water at drip line only; avoid wetting trunk"]}
+    ]
+  },
+  orange: {
+    name:"Orange", icon:"🍊",
+    sub:"Citrus sinensis · Navel, Valencia, Satsuma, Blood Orange suit Zone 9",
+    moisture:{level:3, label:"Moderate — consistent deep watering; excellent drainage required"},
+    water:{
+      yr1:"Water every 2–3 days in summer (5–8 gal). Deep watering essential for new trees.",
+      yr2:"1–2× per week in summer; every 2 weeks in winter.",
+      mature:"Every 5–7 days in summer. Drip irrigation at drip line preferred."
+    },
+    fert:[
+      {when:"February",what:"Organic citrus fertilizer — high nitrogen (blood meal, feather meal, or citrus blend)."},
+      {when:"May",what:"Second application."},
+      {when:"August",what:"Final application. Stop all feeding by September."}
+    ],
+    fertNote:"Same protocol as grapefruit. Micronutrients (zinc, iron, manganese) are critical in alkaline Texas soils. Use chelated micronutrients in foliar spray if yellowing persists.",
+    pests:[
+      {name:"Asian Citrus Psyllid",sev:"Critical",sevClass:"badge-crit",id:"Same as grapefruit: small brown insect feeding at 45 degrees; white waxy tubules from nymphs on new growth. REPORT IMMEDIATELY.",photo:"https://www.google.com/search?tbm=isch&q=asian+citrus+psyllid",tips:["Report immediately to TX AgriLife — carries fatal HLB disease","Kaolin clay on new flushes; reflective mulch under tree"]},
+      {name:"Citrus Leafminer",sev:"Moderate",sevClass:"badge-mod",id:"Serpentine silvery mines in curled, distorted new growth leaves. Tiny moth targets only new flushes.",photo:"https://www.google.com/search?tbm=isch&q=citrus+leafminer",tips:["Kaolin clay on new flush","Remove heavily affected leaves"]},
+      {name:"Brown Citrus Aphid",sev:"Low",sevClass:"badge-low",id:"Small brown or black insects clustered on new growth. Honeydew and sooty mold. Can also vector citrus tristeza virus.",photo:"https://www.google.com/search?tbm=isch&q=brown+citrus+aphid",tips:["Water blast from hose","Ladybug and lacewing release","Reflective mulch under tree"]}
+    ],
+    diseases:[
+      {name:"Citrus Greening (HLB)",id:"Blotchy asymmetric leaf yellowing; lopsided small bitter fruit that stays green. No cure — prevention and psyllid control are everything.",photo:"https://www.google.com/search?tbm=isch&q=HLB+orange+tree+symptoms",tips:["Control Asian Citrus Psyllid aggressively","Buy certified disease-free stock only","Remove infected trees immediately to protect neighbors"]},
+      {name:"Sooty Mold",id:"Black powdery coating on leaves and fruit following honeydew from aphids, scale, or whitefly. Not directly harmful but blocks photosynthesis and reduces yield.",photo:"https://www.google.com/search?tbm=isch&q=sooty+mold+citrus+orange",tips:["Control the honeydew-producing pest — mold disappears on its own","Wipe leaves with damp cloth; rinse with water"]}
+    ]
+  },
+  apricot: {
+    name:"Apricot", icon:"🍑",
+    sub:"Prunus armeniaca · Katy, Gold Kist, Earlicot for Zone 9",
+    moisture:{level:2, label:"Moderate — good drainage critical; tolerates slight dry-down between waterings"},
+    water:{
+      yr1:"2–3× per week in summer (5–8 gal). Establish roots before first TX summer.",
+      yr2:"Weekly deep watering; 10 gal minimum. Critical during bloom and fruit swell.",
+      mature:"Every 7–10 days during growing season. Reduce after harvest; minimal water in dormancy."
+    },
+    fert:[
+      {when:"February",what:"Balanced 10-10-10 or fruit tree organic fertilizer."},
+      {when:"June (optional)",what:"Light nitrogen if growth is poor."},
+      {when:"Stop by July",what:"No late-season fertilizing."}
+    ],
+    fertNote:"Apricots fruit on prior year's growth — avoid over-fertilizing which pushes vegetative growth at the expense of fruiting spurs.",
+    pests:[
+      {name:"Peach Twig Borer",sev:"High",sevClass:"badge-high",id:"Brown larvae in wilted shoot tips (flagging); later in fruit near stem. Frass visible at tunnel openings.",photo:"https://www.google.com/search?tbm=isch&q=peach+twig+borer+apricot",tips:["Dormant horticultural oil in late winter","Bt spray on early larvae","Pheromone traps for monitoring","Remove wilted shoot tips immediately"]},
+      {name:"Oriental Fruit Moth",sev:"High",sevClass:"badge-high",id:"Larvae in shoot tips early season (similar to twig borer), then inside fruit. Gumminess at entry hole. Adult is small dark gray moth.",photo:"https://www.google.com/search?tbm=isch&q=oriental+fruit+moth+apricot",tips:["Pheromone mating disruption ties hung in canopy","Remove infected twigs and fruit promptly","Encourage parasitic wasps with beneficial insect habitat plants"]},
+      {name:"Scale Insects",sev:"Moderate",sevClass:"badge-mod",id:"Brown or white waxy bumps on bark. Sticky honeydew; sooty mold; branch dieback in heavy infestations.",photo:"https://www.google.com/search?tbm=isch&q=scale+insects+apricot+tree",tips:["Dormant oil spray in late winter","Prune heavily infested branches","Sticky tape bands around trunk to block crawling insects"]}
+    ],
+    diseases:[
+      {name:"Brown Rot",id:"Soft brown rot on ripening fruit with tan powdery spore rings. Blossoms and twigs also affected in wet spring weather.",photo:"https://www.google.com/search?tbm=isch&q=brown+rot+apricot+fruit",tips:["Remove all infected and mummified fruit","Open canopy pruning; drip irrigation only","Organic copper spray at bloom in wet weather"]},
+      {name:"Bacterial Canker",id:"Sunken dead areas on bark (cankers) oozing amber gum. Branch wilts above canker. Leaves show small brown spots with yellow halos ('shot hole' effect).",photo:"https://www.google.com/search?tbm=isch&q=bacterial+canker+apricot+gummosis",tips:["Prune infected branches during dry weather; sterilize tools","Copper bactericide spray in fall after leaf drop","Avoid wounding bark; protect from frost which opens infection sites"]}
+    ]
+  },
+  avocado: {
+    name:"Avocado", icon:"🥑",
+    sub:"Persea americana · choose cold-hardy: Lila, Mexicola, Day for Zone 9",
+    moisture:{level:2, label:"Moderate — EXCELLENT drainage absolutely essential; extremely sensitive to waterlogging"},
+    water:{
+      yr1:"Water every 2–3 days (5 gal). Do NOT overwater — root rot kills more avocados than anything else in TX.",
+      yr2:"Weekly deep watering. Always check soil isn't still wet before watering again.",
+      mature:"Every 7–14 days. Reduce significantly in winter. Never allow standing water near roots."
+    },
+    fert:[
+      {when:"March",what:"Nitrogen-focused organic fertilizer (blood meal, feather meal, or avocado-specific blend)."},
+      {when:"June",what:"Balanced fertilizer with zinc and boron micronutrients."},
+      {when:"September",what:"Final application; no feeding after October."}
+    ],
+    fertNote:"Avocados in alkaline TX soils often show iron and zinc deficiency (yellow leaves with green veins). Use chelated iron foliar spray every 4–6 weeks during growing season.",
+    pests:[
+      {name:"Avocado Lace Bug",sev:"Moderate",sevClass:"badge-mod",id:"Tiny (1/8 inch) lacy-winged bug on leaf undersides. Upper leaf shows silvery/bleached stippling. Black tar-like excrement on undersides.",photo:"https://www.google.com/search?tbm=isch&q=avocado+lace+bug+damage",tips:["Blast undersides of leaves with water weekly","Introduce minute pirate bugs — key predators","Remove heavily infested leaves; dispose"]},
+      {name:"Persea Mite",sev:"High",sevClass:"badge-high",id:"Near-microscopic mites on leaf undersides. Leaves show necrotic brown blotches with whitish cast. Severe defoliation in summer — major TX pest.",photo:"https://www.google.com/search?tbm=isch&q=persea+mite+avocado+leaf+damage",tips:["Strong water spray on undersides of leaves — most effective organic control","Release predatory mites (Neoseiulus californicus)","Mulch to reduce dust — dusty conditions cause mite explosions"]}
+    ],
+    diseases:[
+      {name:"Phytophthora Root Rot",id:"Tree slowly declines; leaves turn pale then brown and drop. Fine feeder roots are brown and dead when dug up. Most common killer of avocados in TX.",photo:"https://www.google.com/search?tbm=isch&q=phytophthora+root+rot+avocado",tips:["Plant on raised berms or raised beds — drainage is everything","Never irrigate excessively; always let soil partially dry","Apply Trichoderma-based biocontrol to soil","Mulch with wood chips but keep 6 inches from trunk"]},
+      {name:"Sunblotch Viroid",id:"Yellow or red streaks/blotches on fruit skin. Leaves may show yellow stripes. Stunted fruit. No cure — viroid is systemic. Spreads through infected nursery stock and tools.",photo:"https://www.google.com/search?tbm=isch&q=avocado+sunblotch+viroid+fruit",tips:["Buy only certified viroid-free nursery trees","Sterilize all cutting tools with 10% bleach or isopropyl alcohol between cuts","Remove and destroy infected trees"]}
+    ]
+  },
+  blueberry: {
+    name:"Blueberry", icon:"🫐",
+    sub:"Vaccinium · Southern Highbush: Misty, O'Neal, Sunshine Blue for Zone 9",
+    moisture:{level:4, label:"High — consistently moist but well-drained; ACIDIC soil pH 4.5–5.5 is critical"},
+    water:{
+      yr1:"Every 2–3 days (1–2 gal). Blueberries have shallow roots and dry out fast in TX heat.",
+      yr2:"Every 3–4 days; mulch heavily with pine bark to retain moisture.",
+      mature:"1–2 inches per week via drip. Use rainwater when possible — TX tap water is alkaline and raises soil pH."
+    },
+    fert:[
+      {when:"March",what:"Acid-forming fertilizer (ammonium sulfate) or azalea/blueberry fertilizer ONLY. NOT regular balanced fertilizer."},
+      {when:"May",what:"Second application of acidic fertilizer after bloom."},
+      {when:"July",what:"Final application for the season."}
+    ],
+    fertNote:"Blueberries MUST have acidic soil (pH 4.5–5.5). Simonton soils are alkaline — amend with sulfur, pine bark mulch, and acidic fertilizers. Test soil pH annually.",
+    pests:[
+      {name:"Birds",sev:"High",sevClass:"badge-high",id:"Stripped berries, missing berries, damaged clusters. Most damage occurs at dawn when birds are most active.",photo:"https://www.google.com/search?tbm=isch&q=bird+netting+blueberry+protection",tips:["Net with bird netting before berries show color — essential, not optional","Reflective tape or old CDs hung in canopy","Scare devices (owl decoys) — rotate positions weekly so birds don't learn to ignore them"]},
+      {name:"Stem Borer",sev:"Moderate",sevClass:"badge-mod",id:"Sudden wilting of cane tips. Cane may break off at ground. Small round exit holes in bark. Larva tunnels down the cane.",photo:"https://www.google.com/search?tbm=isch&q=blueberry+stem+borer+damage",tips:["Prune and destroy wilted canes immediately, cutting below the damage","Remove all dead wood annually to eliminate overwintering sites"]}
+    ],
+    diseases:[
+      {name:"Mummy Berry",id:"Shoots wilt in spring (shoot blight). Infected berries turn salmon-pink then dry, harden, and mummify on plant or drop. Hard gray-brown mummies on ground.",photo:"https://www.google.com/search?tbm=isch&q=mummy+berry+blueberry",tips:["Rake and destroy ALL mummified berries from ground before bud break — critical","Apply 2–4 inches of fresh mulch each year to bury remaining mummies","Choose resistant varieties: Duke, Elliot, LateBlue"]},
+      {name:"Stem Canker",id:"Brick-red to tan cankers on canes with cracked bark. Canker expands and cane dies back. Worse on stressed plants with poor nutrition or pH.",photo:"https://www.google.com/search?tbm=isch&q=blueberry+stem+canker",tips:["Prune out infected canes to healthy wood; sterilize pruners","Maintain plant vigor with proper acidic fertilization and watering","Choose resistant varieties: Bluetta, Elliot, Rancocas"]}
+    ]
+  },
+  blackberry: {
+    name:"Blackberry", icon:"🍇",
+    sub:"Rubus · Natchez, Kiowa, Triple Crown perform well in Zone 9 TX",
+    moisture:{level:3, label:"Moderate — consistent moisture during fruiting; well-drained soil essential"},
+    water:{
+      yr1:"Water every 3 days during establishment (2–3 gal). Shallow roots dry out quickly.",
+      yr2:"Weekly deep watering; 2–4 gal. Drip irrigation ideal.",
+      mature:"1–1.5 inches per week during growing season. Critical during flowering and berry development."
+    },
+    fert:[
+      {when:"Early February",what:"Balanced fertilizer 10-10-10 or composted manure; broadcast around canes."},
+      {when:"After harvest",what:"Light compost application to support next year's cane growth."}
+    ],
+    fertNote:"Avoid planting near wild blackberries — they carry disease. Do not plant where tomatoes, peppers, eggplants, or raspberries have grown.",
+    pests:[
+      {name:"Japanese Beetle",sev:"Moderate",sevClass:"badge-mod",id:"Metallic green/copper 1/2-inch beetles skeletonizing leaves (eating between veins). Feed in clusters, often on top of plant.",photo:"https://www.google.com/search?tbm=isch&q=japanese+beetle+blackberry",tips:["Hand-pick into soapy water early morning (beetles are sluggish when cool)","Row cover during peak feeding period June–August","Milky spore (Bacillus popilliae) applied to soil kills larvae — long-term control"]},
+      {name:"Spotted Wing Drosophila",sev:"High",sevClass:"badge-high",id:"Small fly (like a fruit fly). Males have dark wing spots. Unlike other fruit flies, attacks healthy ripening fruit. Soft spots on ripe berries; tiny white maggots inside.",photo:"https://www.google.com/search?tbm=isch&q=spotted+wing+drosophila+blackberry",tips:["Harvest as soon as ripe — don't leave berries on plant","Fine mesh netting (1mm) exclusion over plants during fruiting","Collect and destroy fallen fruit daily"]}
+    ],
+    diseases:[
+      {name:"Cane Blight",id:"Dark brown lesions at wounds or pruning cuts on canes. Lesions girdle cane causing sudden wilting and death of the cane above. Leaves wilt and brown.",photo:"https://www.google.com/search?tbm=isch&q=blackberry+cane+blight",tips:["Prune during dry weather; sterilize tools between cuts","Remove and destroy all dead and infected canes","Avoid mechanical wounding during cultivation"]},
+      {name:"Orange Rust",id:"Leaves severely distorted in spring. Undersides covered with bright orange powdery pustules. Systemically infected — plants NEVER recover.",photo:"https://www.google.com/search?tbm=isch&q=orange+rust+blackberry",tips:["Remove and destroy entire infected plant immediately — cannot be treated","Plant resistant varieties","Do not compost infected material"]}
+    ]
+  },
+  raspberry: {
+    name:"Raspberry", icon:"🍓",
+    sub:"Rubus idaeus · Zone 9 challenging — Dorman Red, Heritage, Mysore for heat",
+    moisture:{level:3, label:"Moderate-high — consistent moisture; good drainage essential; roots sensitive to waterlogging"},
+    water:{
+      yr1:"Every 2–3 days (2–3 gal). Shallow fibrous roots dry out quickly in TX heat.",
+      yr2:"Every 3–4 days in summer. Mulch heavily with 4 inches straw or wood chips.",
+      mature:"1–1.5 inches per week. Drip at base only — wet foliage promotes disease."
+    },
+    fert:[
+      {when:"Early spring",what:"Balanced fertilizer or compost before new canes emerge."},
+      {when:"After first harvest",what:"Light balanced fertilizer to support fall crop on everbearing types."}
+    ],
+    fertNote:"Raspberries are Zone 9's most challenging bramble due to heat. Provide afternoon shade if possible. Dorman Red is the most heat-tolerant for hot TX summers.",
+    pests:[
+      {name:"Spotted Wing Drosophila",sev:"High",sevClass:"badge-high",id:"Small fly attacking healthy ripening fruit. Soft leaking berries with tiny white maggots inside — damage discovered during or after harvest.",photo:"https://www.google.com/search?tbm=isch&q=spotted+wing+drosophila+raspberry",tips:["Harvest every 2 days at peak ripeness","Fine mesh exclusion netting over plants during fruiting","Remove and destroy all fallen and overripe fruit daily"]},
+      {name:"Raspberry Crown Borer",sev:"Moderate",sevClass:"badge-mod",id:"Clearwing moth larva tunnels into crown and roots over 2 years. Canes wilt in late summer; pulling up wilted cane reveals larval tunnel at base.",photo:"https://www.google.com/search?tbm=isch&q=raspberry+crown+borer",tips:["Dig up and destroy affected crowns","Remove wilted canes before adult moth emerges in late summer","Avoid excess nitrogen which promotes susceptible soft growth"]}
+    ],
+    diseases:[
+      {name:"Root Rot (Phytophthora)",id:"Primocanes wilt and die despite adequate water. Roots are brown and rotted (healthy roots are white). Plants collapse in summer heat.",photo:"https://www.google.com/search?tbm=isch&q=raspberry+root+rot+phytophthora",tips:["Raised beds strongly recommended in TX — drainage is critical","Never overwater; use drip irrigation only","Trichoderma biocontrol applied to soil at planting"]},
+      {name:"Gray Mold (Botrytis)",id:"Gray fuzzy mold on ripening or ripe berries. Spreads rapidly in humid conditions. Entire cluster may collapse.",photo:"https://www.google.com/search?tbm=isch&q=gray+mold+botrytis+raspberry",tips:["Harvest frequently; don't leave ripe fruit on plant","Wide spacing for air flow; prune for open canopy","Straw mulch to keep fruit off soil"]}
+    ]
+  },
+  kiwi: {
+    name:"Kiwi", icon:"🥝",
+    sub:"Actinidia · hardy kiwi (A. arguta) suits Zone 9; needs sturdy trellis; needs male + female",
+    moisture:{level:4, label:"High — large water volumes throughout growing season; never drought-stressed"},
+    water:{
+      yr1:"Every 2–3 days (3–5 gal). Kiwi vines are heavy water users from day one.",
+      yr2:"Every 3–4 days; increase in summer. Mulch deeply.",
+      mature:"Effectively daily in peak TX summer. More plants die from drought or waterlogging than anything else."
+    },
+    fert:[
+      {when:"Early March",what:"High-nitrogen organic fertilizer broadcast around vine and watered in well."},
+      {when:"After fruit set (June)",what:"Balanced fertilizer — supplemental feeding through early summer."},
+      {when:"Stop by July",what:"Late nitrogen reduces fruit storage quality."}
+    ],
+    fertNote:"Kiwi are heavy nitrogen feeders. In alkaline TX soils, use acidifying fertilizers or add sulfur. You need BOTH a male and female vine for fruit (except self-fertile 'Issai' variety).",
+    pests:[
+      {name:"Aphids",sev:"Low",sevClass:"badge-low",id:"Clusters of soft-bodied insects on new growth tips. Honeydew deposits; leaf curl and distortion.",photo:"https://www.google.com/search?tbm=isch&q=aphids+kiwi+vine",tips:["Water blast; encourage ladybugs and lacewings","Plant dill, fennel, and yarrow nearby to attract beneficials"]},
+      {name:"Root Knot Nematodes",sev:"Moderate",sevClass:"badge-mod",id:"Swollen knotted galls on roots. Above-ground symptoms: yellowing, stunting, wilting despite adequate watering. Common in TX sandy soils.",photo:"https://www.google.com/search?tbm=isch&q=root+knot+nematode+galls",tips:["French marigold cover crop before planting (natural nematode suppression)","Soil solarization in summer before planting (clear plastic over moist soil for 6 weeks)","Add compost to promote beneficial soil organisms"]}
+    ],
+    diseases:[
+      {name:"Phytophthora Crown Rot",id:"Plant collapses suddenly, especially after a wet period followed by heat. Crown at soil line shows brown rotted tissue.",photo:"https://www.google.com/search?tbm=isch&q=phytophthora+crown+rot+kiwi",tips:["Never plant in poorly drained areas — non-negotiable","Keep crown dry; water at drip line only","Raise crown slightly above soil level at planting"]},
+      {name:"Botrytis Blossom Blight",id:"Flowers and new shoots covered in gray fuzzy mold during wet spring. Infection can spread into developing fruit.",photo:"https://www.google.com/search?tbm=isch&q=botrytis+blossom+blight+kiwi",tips:["Aggressive annual pruning for maximum air circulation","Avoid overhead irrigation","Remove affected blossoms and tissue promptly"]}
+    ]
+  }
+};
+
+const PLANTS = [
+  {id:'pomegranate',label:'Pomegranate'},{id:'apple',label:'Apple'},
+  {id:'plum',label:'Plum'},{id:'pear',label:'Pear'},
+  {id:'olive',label:'Olive'},{id:'grapefruit',label:'Grapefruit'},
+  {id:'orange',label:'Orange'},{id:'apricot',label:'Apricot'},
+  {id:'avocado',label:'Avocado'},{id:'blueberry',label:'Blueberry'},
+  {id:'blackberry',label:'Blackberry'},{id:'raspberry',label:'Raspberry'},
+  {id:'kiwi',label:'Kiwi'}
+];
+
+let currentPlant = null;
+let currentTab = 'water';
+
+function buildPlantBar() {
+  const scroll = document.getElementById('plantScroll');
+  PLANTS.forEach(p => {
+    const d = DATA[p.id];
+    const chip = document.createElement('div');
+    chip.className = 'plant-chip';
+    chip.id = 'chip-' + p.id;
+    chip.innerHTML = `<span class="plant-chip-icon">${d.icon}</span><span class="plant-chip-label">${p.label}</span>`;
+    chip.addEventListener('click', () => selectPlant(p.id));
+    scroll.appendChild(chip);
+  });
+}
+
+function selectPlant(id) {
+  if (currentPlant) document.getElementById('chip-' + currentPlant).classList.remove('active');
+  currentPlant = id;
+  document.getElementById('chip-' + id).classList.add('active');
+  document.getElementById('chip-' + id).scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+
+  const d = DATA[id];
+  document.getElementById('heroTitle').textContent = d.icon + ' ' + d.name;
+  document.getElementById('heroSub').textContent = d.sub;
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('detailView').style.display = 'flex';
+
+  document.querySelectorAll('.tab-btn').forEach((t,i) => t.classList.toggle('active', i === 0));
+  currentTab = 'water';
+  renderTab();
+}
+
+function switchTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tabContent').scrollTop = 0;
+  renderTab();
+}
+
+function renderTab() {
+  const d = DATA[currentPlant];
+  const el = document.getElementById('tabContent');
+  if (currentTab === 'water') el.innerHTML = renderWater(d);
+  else if (currentTab === 'fert') el.innerHTML = renderFert(d);
+  else if (currentTab === 'pests') el.innerHTML = renderPests(d);
+  else el.innerHTML = renderDiseases(d);
+
+  el.querySelectorAll('.accord-head').forEach(h => {
+    h.addEventListener('click', () => {
+      h.parentElement.classList.toggle('open');
+    });
+  });
+}
+
+function renderWater(d) {
+  const dots = Array.from({length:5}, (_,i) =>
+    `<div class="dot ${i < d.moisture.level ? 'on' : ''}"></div>`).join('');
+  return `
+    <div class="section-label">Soil moisture preference</div>
+    <div class="card"><div class="card-body">
+      <div class="moisture-row">
+        <div class="moisture-dots">${dots}</div>
+        <div class="moisture-lbl">${d.moisture.label}</div>
+      </div>
+    </div></div>
+    <div class="section-label">Watering schedule</div>
+    <div class="water-grid">
+      <div class="water-card"><div class="water-yr">🌱 Year 1</div><div class="water-txt">${d.water.yr1}</div></div>
+      <div class="water-card"><div class="water-yr">🌿 Year 2</div><div class="water-txt">${d.water.yr2}</div></div>
+      <div class="water-card"><div class="water-yr">🌳 Year 3+</div><div class="water-txt">${d.water.mature}</div></div>
+    </div>
+    <div class="note-box green"><span>💡</span><div>Simonton, TX receives ~45 inches of rain annually, but summer heat demand is extreme. Drip irrigation at the drip line (not the trunk) is strongly recommended for all trees.</div></div>`;
+}
+
+function renderFert(d) {
+  const rows = d.fert.map(f =>
+    `<div class="fert-row"><span class="fert-when">${f.when}</span><span class="fert-what">${f.what}</span></div>`
+  ).join('');
+  return `
+    <div class="section-label">Fertilizer protocol — Zone 9</div>
+    <div class="card"><div class="card-body">${rows}</div></div>
+    ${d.fertNote ? `<div class="note-box"><span>⚠️</span><div>${d.fertNote}</div></div>` : ''}
+    <div class="note-box green" style="margin-top:10px;"><span>🌱</span><div>Organic options: compost, worm castings, blood meal (N), bone meal (P), kelp meal (K+micro), fish emulsion (quick N). Apply 3–4 inch mulch year-round — the highest single ROI habit for your orchard.</div></div>`;
+}
+
+function renderPests(d) {
+  return `<div class="section-label">Common pests — tap to expand</div>` +
+    d.pests.map(p => `
+    <div class="accord">
+      <div class="accord-head">
+        <span class="accord-icon">🐛</span>
+        <span class="accord-title">${p.name}</span>
+        <span class="accord-badge ${p.sevClass}">${p.sev}</span>
+        <span class="accord-chevron">⌄</span>
+      </div>
+      <div class="accord-body">
+        <div class="id-block">
+          <div class="id-lbl">How to identify</div>
+          <div class="id-txt">${p.id}</div>
+          <a class="photo-btn" href="${p.photo}" target="_blank"><span>🔍</span>Search identification photos</a>
+        </div>
+        <div class="section-label" style="margin-top:12px;">Organic control (no chemicals)</div>
+        <ul class="tip-list">${p.tips.map(t=>`<li>${t}</li>`).join('')}</ul>
+      </div>
+    </div>`).join('');
+}
+
+function renderDiseases(d) {
+  return `<div class="section-label">Common diseases — tap to expand</div>` +
+    d.diseases.map(dis => `
+    <div class="accord">
+      <div class="accord-head">
+        <span class="accord-icon">🍂</span>
+        <span class="accord-title">${dis.name}</span>
+        <span class="accord-chevron">⌄</span>
+      </div>
+      <div class="accord-body">
+        <div class="id-block">
+          <div class="id-lbl">How to identify</div>
+          <div class="id-txt">${dis.id}</div>
+          <a class="photo-btn" href="${dis.photo}" target="_blank"><span>🔍</span>Search identification photos</a>
+        </div>
+        <div class="section-label" style="margin-top:12px;">Organic prevention & treatment</div>
+        <ul class="tip-list">${dis.tips.map(t=>`<li>${t}</li>`).join('')}</ul>
+      </div>
+    </div>`).join('');
+}
+
+// PWA install
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtn').classList.add('visible');
+});
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('installBtn').classList.remove('visible');
+    });
+  }
+}
+
+// Service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+buildPlantBar();
+</script>
+</body>
+</html>
